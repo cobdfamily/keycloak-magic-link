@@ -15,7 +15,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <keycloak.version>26.6.3</keycloak.version>
-        <testcontainer.keycloak.version>3.6.0</testcontainer.keycloak.version>
+        <testcontainer.keycloak.version>4.2.1</testcontainer.keycloak.version>
         <junit.version>5.12.1</junit.version>
         <testcontainer.junit.version>1.20.6</testcontainer.junit.version>
         <jinjava.version>2.7.4</jinjava.version>
@@ -95,4 +95,22 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- Surface keycloak.version to the test JVM so the
+                 testcontainers harness pins the official Keycloak image
+                 (quay.io/keycloak/keycloak) at the exact version the jar
+                 is built against — see KeycloakInstanceProvider. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <keycloak.version>${keycloak.version}</keycloak.version>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
