@@ -1,5 +1,7 @@
 package io.cloudflight.keycloak.magiclink.authenticators;
 
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY;
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_CREATE_USER;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.VALIDITY_DURATION_CONFIG_KEY;
 
@@ -47,7 +49,19 @@ public abstract class AbstractMagicLinkAuthenticatorFactory implements Authentic
         magicKeyValidityDuration.setHelpText("Duration in seconds that a magic key is valid");
         magicKeyValidityDuration.setRequired(true);
         magicKeyValidityDuration.setDefaultValue(DEFAULT_VALIDITY_IN_SECONDS);
-        return List.of(magicKeyValidityDuration);
+
+        ProviderConfigProperty createUser = new ProviderConfigProperty();
+        createUser.setName(CREATE_USER_CONFIG_KEY);
+        createUser.setLabel("Create user if not found");
+        createUser.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        createUser.setHelpText(
+              "If enabled, a magic-link request for an email that matches no "
+              + "existing user provisions that user just-in-time. The account's "
+              + "email is marked verified once the magic link is clicked. When "
+              + "disabled, unknown emails are ignored.");
+        createUser.setDefaultValue(DEFAULT_CREATE_USER);
+
+        return List.of(magicKeyValidityDuration, createUser);
     }
 
     @Override

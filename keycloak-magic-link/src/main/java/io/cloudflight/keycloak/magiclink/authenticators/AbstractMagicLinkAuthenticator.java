@@ -14,6 +14,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.validation.Validation;
 
 import io.cloudflight.keycloak.magiclink.entity.MagicLinkSession;
 import io.cloudflight.keycloak.magiclink.sending.EmailLinkSender;
@@ -47,8 +48,14 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         }
 
         UserModel user = findUserByEmailAddress(context, email);
+        if (user == null && isCreateUserEnabled(context) && Validation.isEmailValid(email)) {
+            // Just-in-time provisioning: a first-time email becomes a new
+            // user. The email is only marked verified once the link is
+            // actually clicked (see markEmailVerified).
+            user = createUser(context, email);
+        }
         if (user != null) {
-            // Create a magic link and send it only if the user exists
+            // Create a magic link and send it (existing or newly provisioned user).
             context.setUser(user);
             final String magicKey = generateMagicKey();
             final String magicLinkSessionId = UUID.randomUUID().toString();
@@ -143,6 +150,46 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
     protected UserModel findUserByEmailAddress(AuthenticationFlowContext context, String email) {
         return KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), email);
+    }
+
+    /**
+     * Whether just-in-time user provisioning is enabled on this execution
+     * (the "Create user if not found" config flag). Defaults to off.
+     */
+    protected boolean isCreateUserEnabled(AuthenticationFlowContext context) {
+        AuthenticatorConfigModel config = context.getAuthenticatorConfig();
+        return config != null
+              && Boolean.parseBoolean(
+                    config.getConfig().get(MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY));
+    }
+
+    /**
+     * Create a new enabled user keyed by the given email (username == email).
+     * Email stays unverified until the magic link is clicked, at which point
+     * {@link #markEmailVerified} flips it.
+     */
+    protected UserModel createUser(AuthenticationFlowContext context, String email) {
+        KeycloakSession session = context.getSession();
+        RealmModel realm = context.getRealm();
+        UserModel user = session.users().addUser(realm, email);
+        user.setEnabled(true);
+        user.setEmail(email);
+        user.setEmailVerified(false);
+        logger.infof("magic-link: provisioned new user for %s", email);
+        return user;
+    }
+
+    /**
+     * Mark the authenticated user's email as verified. Called on a successful
+     * magic-link validation: clicking the emailed link proves ownership of the
+     * address, so a just-provisioned (or previously unverified) user becomes
+     * verified — avoiding a redundant VERIFY_EMAIL required action afterwards.
+     */
+    protected void markEmailVerified(AuthenticationFlowContext context) {
+        UserModel user = context.getUser();
+        if (user != null && !user.isEmailVerified()) {
+            user.setEmailVerified(true);
+        }
     }
 
     protected void removeMagicLinkSession(AuthenticationFlowContext context, MagicLinkSession session) {

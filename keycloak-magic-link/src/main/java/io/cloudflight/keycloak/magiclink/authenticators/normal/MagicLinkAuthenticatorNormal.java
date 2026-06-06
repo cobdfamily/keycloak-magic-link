@@ -39,6 +39,7 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
             }
 
             if (loggedIn) {
+                markEmailVerified(context);
                 context.success();
             } else {
                 context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, getEmailLoginForm(context));
