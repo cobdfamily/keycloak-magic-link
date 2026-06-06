@@ -14,7 +14,14 @@ public class KeycloakInstanceProvider {
 
     private static final StringRealmImportKeycloakContainer keycloak =
           new StringRealmImportKeycloakContainer(KEYCLOAK_IMAGE)
-                .withDefaultProviderClasses();
+                .withDefaultProviderClasses()
+                // The test realm points SMTP at host.docker.internal so KC
+                // can reach the Mailhog container's host-published port. On
+                // Docker Desktop that name resolves automatically, but on a
+                // Linux engine (incl. CI) it does not unless we map it to the
+                // host gateway — without this the magic-link email never
+                // arrives and the e2e tests fail.
+                .withExtraHost("host.docker.internal", "host-gateway");
 
 
     public static void start() {
