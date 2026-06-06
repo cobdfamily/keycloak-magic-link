@@ -19,6 +19,7 @@ import org.keycloak.services.validation.Validation;
 import io.cloudflight.keycloak.magiclink.entity.MagicLinkSession;
 import io.cloudflight.keycloak.magiclink.sending.EmailLinkSender;
 import io.cloudflight.keycloak.magiclink.sending.LinkSender;
+import io.cloudflight.keycloak.magiclink.util.ValidationUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.core.Response;
 
@@ -47,30 +48,30 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
             return;
         }
 
-        UserModel user = findUserByEmailAddress(context, email);
-        if (user == null && isCreateUserEnabled(context) && Validation.isEmailValid(email)) {
-            // Just-in-time provisioning: a first-time email becomes a new
-            // user. The email is only marked verified once the link is
-            // actually clicked (see markEmailVerified).
-            user = createUser(context, email);
-        }
-        if (user != null) {
-            // Create a magic link and send it (existing or newly provisioned user).
-            context.setUser(user);
+        // Decide whether to handle this address: an existing user, or — when
+        // JIT provisioning is enabled — any syntactically valid email. We do
+        // NOT create or set the user here: the account is created only when
+        // the link is validated (proving ownership). See resolveOrCreateUser,
+        // called from the concrete authenticators' success path.
+        boolean willHandle = findUserByEmailAddress(context, email) != null
+              || (isCreateUserEnabled(context) && Validation.isEmailValid(email));
+
+        if (willHandle) {
             final String magicKey = generateMagicKey();
             final String magicLinkSessionId = UUID.randomUUID().toString();
-            storeMagicKey(context, magicKey, magicLinkSessionId);
-            sendLink(context, getMagicLink(context, magicKey, magicLinkSessionId));
+            storeMagicKey(context, magicKey, magicLinkSessionId, email);
+            sendLink(context, email, getMagicLink(context, magicKey, magicLinkSessionId));
         }
 
-        // Show waiting page even if user does not exist -> prevents guessing of users
+        // Show the info/wait page regardless, so unknown (and not-to-be-created)
+        // addresses cannot be enumerated from the response.
         showLinkSentInfo(context);
     }
 
     @Override
-    public void sendLink(AuthenticationFlowContext context, String magicLink) {
+    public void sendLink(AuthenticationFlowContext context, String email, String magicLink) {
         try {
-            linkSender.sendLink(context.getSession(), context.getUser(), magicLink);
+            linkSender.sendLink(context.getSession(), email, magicLink);
         } catch (IOException e) {
             logger.warn("MagicLink not generated", e);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR, Response.serverError().build());
@@ -107,7 +108,8 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         return KeycloakModelUtils.generateId();
     }
 
-    protected void storeMagicKey(AuthenticationFlowContext context, String magicKey, String magicLinkSessionId) {
+    protected void storeMagicKey(
+          AuthenticationFlowContext context, String magicKey, String magicLinkSessionId, String email) {
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
         long validityDurationInSeconds = MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
         if (config != null) {
@@ -118,12 +120,28 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
         MagicLinkSession magicLinkSession = new MagicLinkSession();
         magicLinkSession.setId(magicLinkSessionId);
-        magicLinkSession.setMagicKey(magicKey);
+        // Store only the hash of the key, never the key itself.
+        magicLinkSession.setMagicKeyHash(ValidationUtils.sha256Hex(magicKey));
+        magicLinkSession.setEmail(email);
         magicLinkSession.setValidTo(validTo);
         magicLinkSession.setRedirectUri(context.getRefreshUrl(true).toString());
 
         context.getAuthenticationSession().setAuthNote(MAGICLINK_SESSION_ID_KEY, magicLinkSessionId);
         getEntityManager(context).persist(magicLinkSession);
+    }
+
+    /**
+     * Resolve the user for a validated magic link: an existing user by email,
+     * or — when JIT provisioning is enabled and the address is a valid email —
+     * a freshly-created one. Returns null when no user exists and creation is
+     * not allowed (login then fails). Called only after ownership is proven.
+     */
+    protected UserModel resolveOrCreateUser(AuthenticationFlowContext context, String email) {
+        UserModel user = findUserByEmailAddress(context, email);
+        if (user == null && isCreateUserEnabled(context) && Validation.isEmailValid(email)) {
+            user = createUser(context, email);
+        }
+        return user;
     }
 
     protected EntityManager getEntityManager(AuthenticationFlowContext context) {

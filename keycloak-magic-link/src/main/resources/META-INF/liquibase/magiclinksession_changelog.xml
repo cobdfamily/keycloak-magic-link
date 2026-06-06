@@ -25,4 +25,16 @@
         />
 
     </changeSet>
+
+    <changeSet author="clarus@cobd.ca" id="v2-deferred-creation">
+        <comment>
+            Deferred user provisioning: carry the recipient email so the user
+            can be created/resolved only when the link is clicked. Widen
+            MAGIC_KEY to hold a SHA-256 hex (the raw key is no longer stored).
+        </comment>
+        <addColumn tableName="MAGIC_LINK_SESSION">
+            <column name="EMAIL" type="VARCHAR(255)"/>
+        </addColumn>
+        <modifyDataType tableName="MAGIC_LINK_SESSION" columnName="MAGIC_KEY" newDataType="VARCHAR(64)"/>
+    </changeSet>
 </databaseChangeLog>

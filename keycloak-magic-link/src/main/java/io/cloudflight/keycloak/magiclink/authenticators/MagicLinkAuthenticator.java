@@ -27,10 +27,13 @@ import org.keycloak.authentication.Authenticator;
 public interface MagicLinkAuthenticator extends Authenticator {
 
     /**
-     * Sends a given magic link to the user present in the given context
+     * Sends a given magic link to the given email address. The recipient need
+     * not be an existing user — with deferred provisioning the account is only
+     * created once the link is validated.
      *
      * @param context   The keycloak context
+     * @param email     The recipient email address
      * @param magicLink The link to send
      */
-    void sendLink(AuthenticationFlowContext context, String magicLink);
+    void sendLink(AuthenticationFlowContext context, String email, String magicLink);
 }

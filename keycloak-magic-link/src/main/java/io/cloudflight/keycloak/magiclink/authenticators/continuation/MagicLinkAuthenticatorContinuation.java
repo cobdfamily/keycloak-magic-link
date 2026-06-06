@@ -6,6 +6,7 @@ import io.cloudflight.keycloak.magiclink.util.LinkUtils;
 import jakarta.persistence.EntityManager;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.models.UserModel;
 
 import java.util.Map;
 
@@ -21,26 +22,32 @@ public class MagicLinkAuthenticatorContinuation extends AbstractMagicLinkAuthent
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        if (context.getUser() == null) {
-            // We need the email address of the user
+        // The user is no longer pre-set (deferred provisioning); we're past
+        // the initial email form once the session-id note exists.
+        final String authNoteMagicLinkSessionId = context.getAuthenticationSession().getAuthNote(MAGICLINK_SESSION_ID_KEY);
+        if (authNoteMagicLinkSessionId == null) {
+            // Initial entry: ask for the email address.
             context.challenge(getEmailLoginForm(context));
-        } else {
-            // We wait for the magic link to be clicked
-            final String authNoteMagicLinkSessionId = context.getAuthenticationSession().getAuthNote(MAGICLINK_SESSION_ID_KEY);
-            final EntityManager em = getEntityManager(context);
-            MagicLinkSession magicLinkSession = em.find(MagicLinkSession.class, authNoteMagicLinkSessionId);
-            boolean loggedIn = false;
-            if (magicLinkSession != null && magicLinkSession.isLoggedIn()) {
-                loggedIn = true;
-                removeMagicLinkSession(context, magicLinkSession);
-            }
+            return;
+        }
 
-            if (loggedIn) {
-                markEmailVerified(context);
-                context.success();
-            } else {
-                context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, getEmailLoginForm(context));
-            }
+        // Waiting for the magic link to be clicked (on any device); the REST
+        // resource flips loggedIn once it validates the key.
+        final EntityManager em = getEntityManager(context);
+        MagicLinkSession magicLinkSession = em.find(MagicLinkSession.class, authNoteMagicLinkSessionId);
+        boolean loggedIn = magicLinkSession != null && magicLinkSession.isLoggedIn();
+        String email = magicLinkSession != null ? magicLinkSession.getEmail() : null;
+
+        // Ownership is proven only when the link has been clicked -> resolve or
+        // create the user, then consume the session (single-use).
+        UserModel user = loggedIn ? resolveOrCreateUser(context, email) : null;
+        if (user != null) {
+            removeMagicLinkSession(context, magicLinkSession);
+            context.setUser(user);
+            markEmailVerified(context);
+            context.success();
+        } else {
+            context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, getEmailLoginForm(context));
         }
     }
 

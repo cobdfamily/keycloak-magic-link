@@ -3,10 +3,9 @@ package io.cloudflight.keycloak.magiclink.sending;
 import java.io.IOException;
 
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.UserModel;
 
 /**
- * Abstraction to send magic links to users.
+ * Abstraction to send magic links.
  * Usually, this is done via email, but alternative options might be implemented in the future.
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
@@ -14,12 +13,14 @@ import org.keycloak.models.UserModel;
 public interface LinkSender {
 
     /**
-     * Sends a given magic link to a given user.
+     * Sends a given magic link to a given email address. The recipient need
+     * not be an existing user (deferred provisioning creates the account only
+     * once the link is validated).
      *
      * @param session The Keycloak session
-     * @param user    The recipient (user who requested login)
+     * @param email   The recipient email address
      * @param link    The magic link
      * @throws IOException if the link was not sent successfully
      */
-    void sendLink(KeycloakSession session, UserModel user, String link) throws IOException;
+    void sendLink(KeycloakSession session, String email, String link) throws IOException;
 }
