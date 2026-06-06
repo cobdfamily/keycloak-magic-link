@@ -61,7 +61,18 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
     }
 
     @Override
+    protected boolean supportsOtp() {
+        return true;
+    }
+
+    @Override
     protected void showLinkSentInfo(AuthenticationFlowContext context) {
+        if (isOtpEnabled(context)) {
+            // Offer a code-entry form (the email also carries the code) as a
+            // same-device alternative to clicking the link.
+            context.challenge(buildOtpForm(context, false));
+            return;
+        }
         context.challenge(context.form().setInfo("magiclink-emailSentText")
               // We reset the auth context here so that the entered username is not displayed on the link sent response page
               .setAuthContext(null)

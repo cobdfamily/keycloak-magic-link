@@ -34,6 +34,14 @@ public class MagicLinkSession {
     @Column(name = "VALID_TO", nullable = false)
     private long validTo;
 
+    // Salted SHA-256 hex of the one-time code (null when OTP isn't used).
+    @Column(name = "OTP_HASH")
+    private String otpHash;
+
+    // Wrong-code counter; the session is burned at MAX_OTP_ATTEMPTS.
+    @Column(name = "OTP_ATTEMPTS", nullable = false)
+    private int otpAttempts = 0;
+
     @Column(name = "LOGGED_IN", nullable = false)
     private boolean loggedIn = false;
 
@@ -71,6 +79,22 @@ public class MagicLinkSession {
 
     public void setValidTo(long validTo) {
         this.validTo = validTo;
+    }
+
+    public String getOtpHash() {
+        return otpHash;
+    }
+
+    public void setOtpHash(String otpHash) {
+        this.otpHash = otpHash;
+    }
+
+    public int getOtpAttempts() {
+        return otpAttempts;
+    }
+
+    public void setOtpAttempts(int otpAttempts) {
+        this.otpAttempts = otpAttempts;
     }
 
     public boolean isLoggedIn() {

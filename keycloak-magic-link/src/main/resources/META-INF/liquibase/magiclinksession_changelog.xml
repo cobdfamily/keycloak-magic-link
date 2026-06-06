@@ -37,4 +37,17 @@
         </addColumn>
         <modifyDataType tableName="MAGIC_LINK_SESSION" columnName="MAGIC_KEY" newDataType="VARCHAR(64)"/>
     </changeSet>
+
+    <changeSet author="clarus@cobd.ca" id="v3-otp">
+        <comment>
+            Optional one-time code: salted SHA-256 of the code plus a per-session
+            wrong-attempt counter for brute-force lockout.
+        </comment>
+        <addColumn tableName="MAGIC_LINK_SESSION">
+            <column name="OTP_HASH" type="VARCHAR(64)"/>
+            <column name="OTP_ATTEMPTS" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

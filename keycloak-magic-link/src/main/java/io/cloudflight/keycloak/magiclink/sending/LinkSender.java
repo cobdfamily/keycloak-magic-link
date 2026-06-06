@@ -20,7 +20,8 @@ public interface LinkSender {
      * @param session The Keycloak session
      * @param email   The recipient email address
      * @param link    The magic link
+     * @param otpCode Optional one-time code to include, or null to omit it
      * @throws IOException if the link was not sent successfully
      */
-    void sendLink(KeycloakSession session, String email, String link) throws IOException;
+    void sendLink(KeycloakSession session, String email, String link, String otpCode) throws IOException;
 }

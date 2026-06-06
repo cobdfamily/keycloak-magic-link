@@ -30,6 +30,26 @@ public class MagicLinkValidityConstants {
      */
     public static final boolean DEFAULT_CREATE_USER = false;
 
+    /**
+     * Config key for emailing a one-time numeric code alongside the link, so
+     * the user can finish on the same device by typing the code. Applies to
+     * the normal (same-device) authenticator. Default off.
+     */
+    public static final String SEND_OTP_CONFIG_KEY = "magiclink.send.otp";
+
+    /** Default for {@link #SEND_OTP_CONFIG_KEY} — off. */
+    public static final boolean DEFAULT_SEND_OTP = false;
+
+    /** Number of digits in the one-time code. */
+    public static final int OTP_LENGTH = 6;
+
+    /**
+     * Max wrong OTP attempts per magic-link session before it is burned. The
+     * code is low-entropy (10^OTP_LENGTH), so this cap — together with the
+     * validity window — is what makes brute force infeasible.
+     */
+    public static final int MAX_OTP_ATTEMPTS = 5;
+
 
     private MagicLinkValidityConstants() {
         //prevent instantiation

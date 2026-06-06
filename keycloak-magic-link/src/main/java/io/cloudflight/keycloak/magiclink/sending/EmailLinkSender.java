@@ -19,19 +19,27 @@ import org.keycloak.models.RealmModel;
 public class EmailLinkSender implements LinkSender {
 
     @Override
-    public void sendLink(KeycloakSession session, String email, String link) throws IOException {
+    public void sendLink(KeycloakSession session, String email, String link, String otpCode)
+          throws IOException {
         RealmModel realm = session.getContext().getRealm();
         final String realmName =
               ObjectUtil.isBlank(realm.getDisplayName()) ? realm.getName() : realm.getDisplayName();
 
+        String codeLineText = otpCode == null ? ""
+              : "Or enter this code on the sign-in page: " + otpCode + "\n\n";
+        String codeLineHtml = otpCode == null ? ""
+              : "<p>Or enter this code on the sign-in page: <strong>" + escapeHtml(otpCode) + "</strong></p>";
+
         String subject = "Sign in to " + realmName;
         String text = "Click the link below to sign in to " + realmName + ":\n\n"
               + link + "\n\n"
+              + codeLineText
               + "If you did not request this, you can safely ignore this email.";
-        // The link is a URL we minted, but escape it (and the realm name) for
-        // the HTML part as defence in depth.
+        // The link/code are values we minted, but escape them (and the realm
+        // name) for the HTML part as defence in depth.
         String html = "<p>Click the link below to sign in to " + escapeHtml(realmName) + ":</p>"
               + "<p><a href=\"" + escapeHtml(link) + "\">Sign in</a></p>"
+              + codeLineHtml
               + "<p>If you did not request this, you can safely ignore this email.</p>";
 
         try {

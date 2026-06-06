@@ -2,7 +2,9 @@ package io.cloudflight.keycloak.magiclink.authenticators;
 
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_CREATE_USER;
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_SEND_OTP;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.SEND_OTP_CONFIG_KEY;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.VALIDITY_DURATION_CONFIG_KEY;
 
 import java.util.List;
@@ -61,7 +63,18 @@ public abstract class AbstractMagicLinkAuthenticatorFactory implements Authentic
               + "disabled, unknown emails are ignored.");
         createUser.setDefaultValue(DEFAULT_CREATE_USER);
 
-        return List.of(magicKeyValidityDuration, createUser);
+        ProviderConfigProperty sendOtp = new ProviderConfigProperty();
+        sendOtp.setName(SEND_OTP_CONFIG_KEY);
+        sendOtp.setLabel("Also send a one-time code");
+        sendOtp.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        sendOtp.setHelpText(
+              "If enabled, the email also contains a numeric one-time code and "
+              + "the user can finish by typing it on the same device (an "
+              + "alternative to clicking the link). Applies to the normal "
+              + "magic-link authenticator.");
+        sendOtp.setDefaultValue(DEFAULT_SEND_OTP);
+
+        return List.of(magicKeyValidityDuration, createUser, sendOtp);
     }
 
     @Override
