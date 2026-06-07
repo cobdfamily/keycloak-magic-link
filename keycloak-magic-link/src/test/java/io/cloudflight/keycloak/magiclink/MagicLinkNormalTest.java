@@ -5,8 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com.microsoft.playwright.options.LoadState;
 
 import io.cloudflight.keycloak.magiclink.container.KeycloakInstanceProvider;
 import io.cloudflight.keycloak.magiclink.util.RealmTemplate;
@@ -85,6 +90,49 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
     }
 
 
+    @Test
+    @RealmTemplate("magiclink-normal-jit.json.j2")
+    void testNewUserProvisionedOnLinkClick() {
+        KeycloakInstanceProvider.KeycloakInstanceInfo info = KeycloakInstanceProvider.getInfo();
+
+        // Brand-new email that is not a user yet; with "Create user if not
+        // found" enabled, the link is sent and the account is created only
+        // when the link is clicked (deferred provisioning).
+        loginWithEmailAddress(info.authServerUrl(), "brand-new-user@example.org");
+        Email email = receiveEmail(1, 0);
+        assertNotNull(email);
+        assertNotNull(email.link());
+
+        String response = openLink(email.link());
+        assertLogin(response, true);
+    }
+
+    @Test
+    @RealmTemplate("magiclink-normal-otp.json.j2")
+    void testOtpLogin() {
+        KeycloakInstanceProvider.KeycloakInstanceInfo info = KeycloakInstanceProvider.getInfo();
+
+        loginWithEmailAddress(info.authServerUrl(), "otp-user@example.org");
+        Email email = receiveEmail(1, 0);
+        assertNotNull(email);
+
+        // The email carries a one-time code; type it into the code form that
+        // is now shown on the original page (an alternative to the link).
+        String code = extractOtp(email.bodyTxt());
+        assertNotNull(code, "no OTP code found in email body");
+        page.locator("#code").fill(code);
+        page.locator("[type=submit]").click();
+        page.waitForLoadState(LoadState.NETWORKIDLE);
+
+        assertLogin(page.content(), true);
+    }
+
+    private static String extractOtp(String emailBody) {
+        Matcher m = Pattern.compile("enter this code on the sign-in page:\\s*(\\d{6})").matcher(emailBody);
+        return m.find() ? m.group(1) : null;
+    }
+
+
     //This test is currently disabled until we find a way to manipulate time in keycloak.
     @Disabled
     @Test
@@ -105,7 +153,12 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
 
 
     private void assertLogin(String response, boolean successful) {
-        assertEquals(successful, response.contains("Welcome to Keycloak"));
+        // On success the magic-link flow completes and lands on an
+        // authenticated Keycloak console SPA; on failure the login form (or an
+        // error) is shown instead. The admin-console shell title is only
+        // reached after authentication.
+        boolean actual = response.contains("Keycloak Administration Console");
+        assertEquals(successful, actual);
     }
 
 }

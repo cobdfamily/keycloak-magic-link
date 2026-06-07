@@ -132,8 +132,11 @@ abstract class AbstractMagicLinkBaseTest {
     }
 
     protected void logout() {
-        page.locator(USERINFO_LOCATOR).click();
-        page.locator(SIGNOUT_LOCATOR).click();
+        // Clear the shared browser-context session cookies. This is a robust,
+        // Keycloak-version-independent logout — the account-console UI ids
+        // (#user-dropdown / #sign-out) changed in newer Keycloak and were
+        // never on the page this flow leaves `page` pointed at anyway.
+        browserContext.clearCookies();
     }
 
 

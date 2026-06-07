@@ -103,7 +103,9 @@ class MagicLinkContinuationTest extends AbstractMagicLinkBaseTest {
 
 
     private void assertLogin(String response, boolean successful) {
-        assertEquals(successful, response.contains("Welcome to Keycloak"));
+        // Success lands on an authenticated Keycloak console SPA; the
+        // admin-console shell title is only reached after authentication.
+        assertEquals(successful, response.contains("Keycloak Administration Console"));
     }
 
     private void assertOriginalSessionLoggedIn(boolean successful) {
