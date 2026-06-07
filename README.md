@@ -1,13 +1,16 @@
-# Cloudflight keycloak magic link plugin
+# magiclogin
 
-The hassle-free magic link plugin. 
-This plugin provides two authenticator implementations for keycloak that use magic links to log in users (passwordless).
+Passwordless Keycloak login. `magiclogin` provides Keycloak authenticator
+implementations that log users in via an emailed **magic link** (and an
+optional one-time code), built for **Keycloak 26.6.x**.
 
-> **cobdfamily fork.** Upgraded to **Keycloak 26.6.x** and extended with: deferred
-> user creation, just-in-time provisioning, a one-time-code (OTP) alternative,
-> an optional `login_hint` shortcut, and user-independent (FTL) emails. See
-> [Configuration options](#configuration-options). Forked from
-> [cloudflightio/keycloak-magic-link](https://github.com/cloudflightio/keycloak-magic-link) (Apache-2.0).
+Features: same-device and cross-device (continuation) magic links, an optional
+one-time-code (OTP) path, just-in-time user provisioning with **deferred
+creation** (the account is created only once the link/code is verified), an
+optional `login_hint` shortcut, and theme-rendered emails that don't require a
+user object. See [Configuration options](#configuration-options).
+
+> Builds on prior work by Cloudflight — see [CREDITS.md](CREDITS.md). Apache-2.0.
 
 
 ## Quickstart

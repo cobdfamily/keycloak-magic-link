@@ -102,17 +102,19 @@ class MagicLinkContinuationTest extends AbstractMagicLinkBaseTest {
     }
 
 
-    private void assertLogin(String response, boolean successful) {
-        // Success lands on an authenticated Keycloak console SPA; the
-        // admin-console shell title is only reached after authentication.
-        assertEquals(successful, response.contains("Keycloak Administration Console"));
+    private void assertLogin(String finalUrl, boolean successful) {
+        // A successful login lands on an authenticated Keycloak console
+        // (admin console under /admin/, account console under /account/);
+        // otherwise it ends on the login endpoint. We check the final URL
+        // because the console SPA shell is served statically even when
+        // unauthenticated.
+        assertEquals(successful, finalUrl.contains("/admin/") || finalUrl.contains("/account/"));
     }
 
     private void assertOriginalSessionLoggedIn(boolean successful) {
         page.reload();
         page.waitForLoadState(LoadState.NETWORKIDLE);
-        String content = page.content();
-        assertLogin(content, successful);
+        assertLogin(page.url(), successful);
     }
 
 }

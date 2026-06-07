@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>email.loginwith.secure.keycloak</groupId>
-    <artifactId>keycloak-magic-link</artifactId>
+    <artifactId>email.loginwith.secure.keycloak.magiclogin</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>keycloak-magic-link</name>
+    <name>email.loginwith.secure.keycloak.magiclogin</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -98,6 +98,8 @@
     </dependencyManagement>
 
     <build>
+        <!-- Produce email.loginwith.secure.keycloak.magiclogin.jar (no version suffix). -->
+        <finalName>email.loginwith.secure.keycloak.magiclogin</finalName>
         <plugins>
             <!-- Surface keycloak.version to the test JVM so the
                  testcontainers harness pins the official Keycloak image

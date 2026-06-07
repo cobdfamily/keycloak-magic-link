@@ -1,6 +1,6 @@
 ---
 services:
-  magic-link-keycloak:
+  magiclogin-keycloak:
     build:
       dockerfile: example/Dockerfile
       context: .
@@ -12,7 +12,7 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - '8080:8080'
-  magic-link-mailhog:
+  magiclogin-mailhog:
     image: mailhog/mailhog
     ports:
       - '8025:8025'

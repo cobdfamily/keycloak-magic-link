@@ -124,7 +124,7 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
         page.locator("[type=submit]").click();
         page.waitForLoadState(LoadState.NETWORKIDLE);
 
-        assertLogin(page.content(), true);
+        assertLogin(page.url(), true);
     }
 
     private static String extractOtp(String emailBody) {
@@ -152,12 +152,13 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
     }
 
 
-    private void assertLogin(String response, boolean successful) {
-        // On success the magic-link flow completes and lands on an
-        // authenticated Keycloak console SPA; on failure the login form (or an
-        // error) is shown instead. The admin-console shell title is only
-        // reached after authentication.
-        boolean actual = response.contains("Keycloak Administration Console");
+    private void assertLogin(String finalUrl, boolean successful) {
+        // A successful login lands on an authenticated Keycloak console
+        // (admin console under /admin/, account console under /account/);
+        // a failed/absent session ends on the login endpoint instead. We
+        // check the final URL because the console SPA shell is served
+        // statically even when unauthenticated.
+        boolean actual = finalUrl.contains("/admin/") || finalUrl.contains("/account/");
         assertEquals(successful, actual);
     }
 

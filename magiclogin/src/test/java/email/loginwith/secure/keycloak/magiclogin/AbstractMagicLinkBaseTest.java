@@ -115,20 +115,27 @@ abstract class AbstractMagicLinkBaseTest {
         );
     }
 
+    // Returns the final URL after following the link. We assert on the URL,
+    // not page content, because Keycloak's console SPA shell is served
+    // statically even when unauthenticated (then redirects to login via JS),
+    // so its HTML/title is not a reliable "logged in" signal — but the final
+    // URL is (an authenticated session lands on the console; otherwise on the
+    // login endpoint). See assertLogin in the test classes.
     protected String openLink(String link) {
         Page loginPage = browserContext.newPage();
         loginPage.navigate(link);
         loginPage.waitForLoadState(LoadState.NETWORKIDLE);
-        return loginPage.content();
+        return loginPage.url();
     }
 
     protected String openLinkInNewBrowser(String link) {
         Browser separateBrowser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
         Page newPage = separateBrowser.newContext().newPage();
         newPage.navigate(link);
-        String response = newPage.content();
+        newPage.waitForLoadState(LoadState.NETWORKIDLE);
+        String url = newPage.url();
         separateBrowser.close();
-        return response;
+        return url;
     }
 
     protected void logout() {
