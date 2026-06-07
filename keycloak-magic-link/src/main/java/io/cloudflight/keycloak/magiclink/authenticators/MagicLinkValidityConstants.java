@@ -50,6 +50,16 @@ public class MagicLinkValidityConstants {
      */
     public static final int MAX_OTP_ATTEMPTS = 5;
 
+    /**
+     * Config key: when enabled and the auth request carries a valid-email
+     * {@code login_hint}, the email-entry form is skipped and the link is sent
+     * straight to the hinted address. Default off.
+     */
+    public static final String SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY = "magiclink.skip.email.with.login.hint";
+
+    /** Default for {@link #SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY} — off. */
+    public static final boolean DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT = false;
+
 
     private MagicLinkValidityConstants() {
         //prevent instantiation

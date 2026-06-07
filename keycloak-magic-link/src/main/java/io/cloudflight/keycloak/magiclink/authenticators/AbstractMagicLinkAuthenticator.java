@@ -15,6 +15,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.validation.Validation;
 
 import io.cloudflight.keycloak.magiclink.entity.MagicLinkSession;
@@ -59,13 +60,20 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         if (ObjectUtil.isBlank(email)) {
             return;
         }
+        processEmailAndSend(context, email);
+    }
 
-        // Decide whether to handle this address: an existing user, or — when
-        // JIT provisioning is enabled — any syntactically valid email. We do
-        // NOT create or set the user here: the account is created only when
-        // the link/code is validated (proving ownership). See
-        // resolveOrCreateUser, called from the success paths.
-        boolean willHandle = findUserByEmailAddress(context, email) != null
+    /**
+     * Send a magic link (and optional code) to the given email and challenge
+     * the info/wait/code page. Shared by the form submission and the
+     * login_hint shortcut. Does NOT create or set a user — the account is
+     * created only when the link/code is validated (see resolveOrCreateUser).
+     */
+    protected void processEmailAndSend(AuthenticationFlowContext context, String email) {
+        // Handle this address if it's an existing user, or — when JIT
+        // provisioning is enabled — any syntactically valid email.
+        UserModel existing = findUserByEmailAddress(context, email);
+        boolean willHandle = existing != null
               || (isCreateUserEnabled(context) && Validation.isEmailValid(email));
 
         if (willHandle) {
@@ -75,7 +83,10 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
             // same-device authenticator) and enabled.
             final String otp = (isOtpEnabled(context) && supportsOtp()) ? generateOtp() : null;
             storeMagicKey(context, magicKey, magicLinkSessionId, email, otp);
-            sendLink(context, email, getMagicLink(context, magicKey, magicLinkSessionId), otp);
+            // Personalise with the user's name only if one already exists; no
+            // user is stubbed just for the greeting.
+            final String recipientName = existing != null ? existing.getFirstName() : null;
+            sendLink(context, email, getMagicLink(context, magicKey, magicLinkSessionId), otp, recipientName);
         }
 
         // Show the info/wait/code page regardless, so unknown (and
@@ -85,17 +96,43 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
     @Override
     public void sendLink(AuthenticationFlowContext context, String email, String magicLink) {
-        sendLink(context, email, magicLink, null);
+        sendLink(context, email, magicLink, null, null);
     }
 
     protected void sendLink(
-          AuthenticationFlowContext context, String email, String magicLink, String otpCode) {
+          AuthenticationFlowContext context, String email, String magicLink,
+          String otpCode, String recipientName) {
         try {
-            linkSender.sendLink(context.getSession(), email, magicLink, otpCode);
+            linkSender.sendLink(context.getSession(), email, magicLink, otpCode, recipientName);
         } catch (IOException e) {
             logger.warn("MagicLink not generated", e);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR, Response.serverError().build());
         }
+    }
+
+    /** Whether "skip email form when login_hint is present" is enabled. */
+    protected boolean isSkipEmailWithLoginHintEnabled(AuthenticationFlowContext context) {
+        AuthenticatorConfigModel config = context.getAuthenticatorConfig();
+        return config != null && Boolean.parseBoolean(
+              config.getConfig().get(MagicLinkValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY));
+    }
+
+    /**
+     * If the skip-on-login-hint option is enabled and the auth session carries
+     * a valid-email login_hint (forwarded by the RP / Keycloak broker), send
+     * the link straight to it and challenge the wait/info page — skipping the
+     * email entry form. Returns true when it handled the request.
+     */
+    protected boolean tryLoginHint(AuthenticationFlowContext context) {
+        if (!isSkipEmailWithLoginHintEnabled(context)) {
+            return false;
+        }
+        String hint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
+        if (ObjectUtil.isBlank(hint) || !Validation.isEmailValid(hint.trim())) {
+            return false;
+        }
+        processEmailAndSend(context, hint.trim());
+        return true;
     }
 
     @Override

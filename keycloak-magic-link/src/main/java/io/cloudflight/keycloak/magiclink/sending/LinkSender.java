@@ -17,11 +17,13 @@ public interface LinkSender {
      * not be an existing user (deferred provisioning creates the account only
      * once the link is validated).
      *
-     * @param session The Keycloak session
-     * @param email   The recipient email address
-     * @param link    The magic link
-     * @param otpCode Optional one-time code to include, or null to omit it
+     * @param session       The Keycloak session
+     * @param email         The recipient email address
+     * @param link          The magic link
+     * @param otpCode       Optional one-time code to include, or null to omit it
+     * @param recipientName Optional display name for a greeting, or null
      * @throws IOException if the link was not sent successfully
      */
-    void sendLink(KeycloakSession session, String email, String link, String otpCode) throws IOException;
+    void sendLink(KeycloakSession session, String email, String link, String otpCode, String recipientName)
+          throws IOException;
 }

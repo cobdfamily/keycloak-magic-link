@@ -26,7 +26,12 @@ public class MagicLinkAuthenticatorContinuation extends AbstractMagicLinkAuthent
         // the initial email form once the session-id note exists.
         final String authNoteMagicLinkSessionId = context.getAuthenticationSession().getAuthNote(MAGICLINK_SESSION_ID_KEY);
         if (authNoteMagicLinkSessionId == null) {
-            // Initial entry: ask for the email address.
+            // Initial entry. If a login_hint is present and the option is on,
+            // skip the email form and send straight to the hinted address.
+            if (tryLoginHint(context)) {
+                return;
+            }
+            // Otherwise ask for the email address.
             context.challenge(getEmailLoginForm(context));
             return;
         }

@@ -3,8 +3,10 @@ package io.cloudflight.keycloak.magiclink.authenticators;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_CREATE_USER;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_SEND_OTP;
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.SEND_OTP_CONFIG_KEY;
+import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY;
 import static io.cloudflight.keycloak.magiclink.authenticators.MagicLinkValidityConstants.VALIDITY_DURATION_CONFIG_KEY;
 
 import java.util.List;
@@ -74,7 +76,18 @@ public abstract class AbstractMagicLinkAuthenticatorFactory implements Authentic
               + "magic-link authenticator.");
         sendOtp.setDefaultValue(DEFAULT_SEND_OTP);
 
-        return List.of(magicKeyValidityDuration, createUser, sendOtp);
+        ProviderConfigProperty skipEmailWithLoginHint = new ProviderConfigProperty();
+        skipEmailWithLoginHint.setName(SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY);
+        skipEmailWithLoginHint.setLabel("Skip email form when login_hint is present");
+        skipEmailWithLoginHint.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        skipEmailWithLoginHint.setHelpText(
+              "If enabled and the authentication request carries a valid-email "
+              + "login_hint (forwarded by the relying party / Keycloak broker), "
+              + "the email-entry form is skipped and the magic link is sent "
+              + "straight to that address.");
+        skipEmailWithLoginHint.setDefaultValue(DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT);
+
+        return List.of(magicKeyValidityDuration, createUser, sendOtp, skipEmailWithLoginHint);
     }
 
     @Override

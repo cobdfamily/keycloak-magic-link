@@ -25,7 +25,12 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
     public void authenticate(AuthenticationFlowContext context) {
         final String receivedMagicKey = context.getHttpRequest().getUri().getQueryParameters().getFirst(MAGICKEY_QUERY_PARAM);
         if (receivedMagicKey == null) {
-            // Initial entry: ask for the email address. The user is no longer
+            // Initial entry. If a login_hint is present and the option is on,
+            // skip the email form and send straight to the hinted address.
+            if (tryLoginHint(context)) {
+                return;
+            }
+            // Otherwise ask for the email address. The user is no longer
             // pre-set (deferred provisioning), so we detect the link click by
             // the presence of the magickey query param rather than by getUser().
             context.challenge(getEmailLoginForm(context));
