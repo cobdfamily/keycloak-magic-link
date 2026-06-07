@@ -31,15 +31,21 @@ jobs:
       - name: Build jar
         run: mvn -B -f magiclogin/pom.xml clean package -DskipTests
 
-      - name: Resolve tag
+      - name: Resolve tag and artifact path
         id: tag
-        run: echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+          # Derive the jar name from the same pom properties the finalName uses,
+          # so it tracks the project/Keycloak versions and never drifts.
+          KC=$(mvn -q -f magiclogin/pom.xml help:evaluate -Dexpression=keycloak.version -DforceStdout)
+          VER=$(mvn -q -f magiclogin/pom.xml help:evaluate -Dexpression=project.version -DforceStdout)
+          echo "jar=magiclogin/target/email.loginwith.secure.keycloak.magiclogin-kc${KC}-v${VER}.jar" >> "$GITHUB_OUTPUT"
 
       - name: Publish release with jar
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          JAR=magiclogin/target/email.loginwith.secure.keycloak.magiclogin.jar
+          JAR='${{ steps.tag.outputs.jar }}'
           test -f "$JAR" || { echo "::error::expected artifact missing: $JAR"; exit 1; }
           if gh release view "${{ steps.tag.outputs.tag }}" >/dev/null 2>&1; then
             gh release upload "${{ steps.tag.outputs.tag }}" "$JAR" --clobber

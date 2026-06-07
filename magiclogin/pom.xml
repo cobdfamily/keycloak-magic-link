@@ -98,8 +98,10 @@
     </dependencyManagement>
 
     <build>
-        <!-- Produce email.loginwith.secure.keycloak.magiclogin.jar (no version suffix). -->
-        <finalName>email.loginwith.secure.keycloak.magiclogin</finalName>
+        <!-- Jar name carries the target Keycloak version and the project
+             version, both sourced from properties above so they can't drift:
+             email.loginwith.secure.keycloak.magiclogin-kc26.6.3-v1.0.0.jar -->
+        <finalName>email.loginwith.secure.keycloak.magiclogin-kc${keycloak.version}-v${project.version}</finalName>
         <plugins>
             <!-- Surface keycloak.version to the test JVM so the
                  testcontainers harness pins the official Keycloak image
