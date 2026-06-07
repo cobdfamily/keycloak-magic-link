@@ -1,2 +1,2 @@
-io.cloudflight.keycloak.magiclink.authenticators.normal.MagicLinkAuthenticatorNormalFactory
-io.cloudflight.keycloak.magiclink.authenticators.continuation.MagicLinkAuthenticatorContinuationFactory
+email.loginwith.secure.keycloak.magiclogin.authenticators.normal.MagicLinkAuthenticatorNormalFactory
+email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.MagicLinkAuthenticatorContinuationFactory

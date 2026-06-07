@@ -1,1 +1,1 @@
-io.cloudflight.keycloak.magiclink.entity.MagicLinkSessionJpaEntityProviderFactory
+email.loginwith.secure.keycloak.magiclogin.entity.MagicLinkSessionJpaEntityProviderFactory

@@ -1,1 +1,1 @@
-io.cloudflight.keycloak.magiclink.authenticators.continuation.api.MagicLinkContinuationRestResourceProviderFactory
+email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.api.MagicLinkContinuationRestResourceProviderFactory
