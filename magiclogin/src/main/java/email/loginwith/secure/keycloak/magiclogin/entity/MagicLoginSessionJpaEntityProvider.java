@@ -8,20 +8,20 @@ import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkSessionJpaEntityProvider implements JpaEntityProvider {
+public class MagicLoginSessionJpaEntityProvider implements JpaEntityProvider {
     @Override
     public List<Class<?>> getEntities() {
-        return Collections.singletonList(MagicLinkSession.class);
+        return Collections.singletonList(MagicLoginSession.class);
     }
 
     @Override
     public String getChangelogLocation() {
-        return "META-INF/liquibase/magiclinksession_changelog.xml";
+        return "META-INF/liquibase/magiclogin_session_changelog.xml";
     }
 
     @Override
     public String getFactoryId() {
-        return MagicLinkSessionJpaEntityProviderFactory.FACTORY_ID;
+        return MagicLoginSessionJpaEntityProviderFactory.FACTORY_ID;
     }
 
     @Override

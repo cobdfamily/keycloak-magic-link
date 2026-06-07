@@ -24,7 +24,7 @@ import org.keycloak.authentication.Authenticator;
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public interface MagicLinkAuthenticator extends Authenticator {
+public interface MagicLoginAuthenticator extends Authenticator {
 
     /**
      * Sends a given magic link to the given email address. The recipient need

@@ -3,16 +3,16 @@ package email.loginwith.secure.keycloak.magiclogin.authenticators.normal;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.KeycloakSession;
 
-import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLinkAuthenticatorFactory;
+import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLoginAuthenticatorFactory;
 
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkAuthenticatorNormalFactory extends AbstractMagicLinkAuthenticatorFactory {
+public class MagicLoginAuthenticatorNormalFactory extends AbstractMagicLoginAuthenticatorFactory {
 
-    private static final String PROVIDER_ID = "magiclink";
+    private static final String PROVIDER_ID = "magiclogin";
 
-    private static final MagicLinkAuthenticatorNormal INSTANCE = new MagicLinkAuthenticatorNormal();
+    private static final MagicLoginAuthenticatorNormal INSTANCE = new MagicLoginAuthenticatorNormal();
 
 
     @Override

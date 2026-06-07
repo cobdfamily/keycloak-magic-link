@@ -9,11 +9,11 @@ import org.keycloak.models.KeycloakSessionFactory;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkSessionJpaEntityProviderFactory implements JpaEntityProviderFactory {
+public class MagicLoginSessionJpaEntityProviderFactory implements JpaEntityProviderFactory {
 
-    public static final String FACTORY_ID = "magic-link-entity-provider-factory";
+    public static final String FACTORY_ID = "magiclogin-entity-provider-factory";
 
-    private static final MagicLinkSessionJpaEntityProvider INSTANCE = new MagicLinkSessionJpaEntityProvider();
+    private static final MagicLoginSessionJpaEntityProvider INSTANCE = new MagicLoginSessionJpaEntityProvider();
 
 
     @Override

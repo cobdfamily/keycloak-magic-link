@@ -19,9 +19,9 @@ import email.loginwith.secure.keycloak.magiclogin.util.RealmTemplate;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
+class MagicLoginNormalTest extends AbstractMagicLoginBaseTest {
 
-    private static final String REALM_TEMPLATE = "magiclink-normal.json.j2";
+    private static final String REALM_TEMPLATE = "magiclogin-normal.json.j2";
 
 
     @Test
@@ -91,7 +91,7 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
 
 
     @Test
-    @RealmTemplate("magiclink-normal-jit.json.j2")
+    @RealmTemplate("magiclogin-normal-jit.json.j2")
     void testNewUserProvisionedOnLinkClick() {
         KeycloakInstanceProvider.KeycloakInstanceInfo info = KeycloakInstanceProvider.getInfo();
 
@@ -108,7 +108,7 @@ class MagicLinkNormalTest extends AbstractMagicLinkBaseTest {
     }
 
     @Test
-    @RealmTemplate("magiclink-normal-otp.json.j2")
+    @RealmTemplate("magiclogin-normal-otp.json.j2")
     void testOtpLogin() {
         KeycloakInstanceProvider.KeycloakInstanceInfo info = KeycloakInstanceProvider.getInfo();
 

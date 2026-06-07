@@ -34,3 +34,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Local e2e/build logs
+e2e.out
+pw.out

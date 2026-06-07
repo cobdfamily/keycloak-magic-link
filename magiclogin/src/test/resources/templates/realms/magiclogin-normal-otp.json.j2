@@ -1750,7 +1750,7 @@
     } ]
   }, {
     "id" : "ba1d99b3-e257-463b-9100-66050c70e025",
-    "alias" : "magiclink",
+    "alias" : "magiclogin",
     "description" : "Browser based authentication",
     "providerId" : "basic-flow",
     "topLevel" : true,
@@ -1763,8 +1763,8 @@
       "autheticatorFlow" : false,
       "userSetupAllowed" : false
     }, {
-      "authenticator" : "magiclink",
-      "authenticatorConfig" : "magiclink-config",
+      "authenticator" : "magiclogin",
+      "authenticatorConfig" : "magiclogin-config",
       "authenticatorFlow" : false,
       "requirement" : "ALTERNATIVE",
       "priority" : 11,
@@ -1876,10 +1876,11 @@
     } ]
   } ],
   "authenticatorConfig" : [ {
-    "alias" : "magiclink-config",
+    "alias" : "magiclogin-config",
     "config" : {
       "magickey.validity.duration" : "300",
-      "magiclink.create.user" : "true"
+      "magiclogin.create.user" : "true",
+      "magiclogin.send.otp" : "true"
     }
   }, {
     "id" : "eb03e2df-c377-4d7d-8879-bb468570f1a5",
@@ -1983,7 +1984,7 @@
     "priority" : 1000,
     "config" : { }
   } ],
-  "browserFlow" : "magiclink",
+  "browserFlow" : "magiclogin",
   "registrationFlow" : "registration",
   "directGrantFlow" : "direct grant",
   "resetCredentialsFlow" : "reset credentials",

@@ -3,7 +3,7 @@ package email.loginwith.secure.keycloak.magiclogin.authenticators;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkValidityConstants {
+public class MagicLoginValidityConstants {
 
     /**
      * The key of the keycloak config to set how long a magic key is valid.
@@ -22,7 +22,7 @@ public class MagicLinkValidityConstants {
      * clicked). When disabled (default), unknown emails are ignored, as
      * upstream behaves.
      */
-    public static final String CREATE_USER_CONFIG_KEY = "magiclink.create.user";
+    public static final String CREATE_USER_CONFIG_KEY = "magiclogin.create.user";
 
     /**
      * Default for {@link #CREATE_USER_CONFIG_KEY} — off, to preserve the
@@ -35,7 +35,7 @@ public class MagicLinkValidityConstants {
      * the user can finish on the same device by typing the code. Applies to
      * the normal (same-device) authenticator. Default off.
      */
-    public static final String SEND_OTP_CONFIG_KEY = "magiclink.send.otp";
+    public static final String SEND_OTP_CONFIG_KEY = "magiclogin.send.otp";
 
     /** Default for {@link #SEND_OTP_CONFIG_KEY} — off. */
     public static final boolean DEFAULT_SEND_OTP = false;
@@ -55,13 +55,13 @@ public class MagicLinkValidityConstants {
      * {@code login_hint}, the email-entry form is skipped and the link is sent
      * straight to the hinted address. Default off.
      */
-    public static final String SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY = "magiclink.skip.email.with.login.hint";
+    public static final String SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY = "magiclogin.skip.email.with.login.hint";
 
     /** Default for {@link #SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY} — off. */
     public static final boolean DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT = false;
 
 
-    private MagicLinkValidityConstants() {
+    private MagicLoginValidityConstants() {
         //prevent instantiation
     }
 }

@@ -1,7 +1,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="ludwig.burtscher@cloudflight.io" id="v1">
 
-        <createTable tableName="MAGIC_LINK_SESSION">
+        <createTable tableName="MAGIC_LOGIN_SESSION">
             <column name="ID" type="VARCHAR(36)">
                 <constraints nullable="false"/>
             </column>
@@ -19,8 +19,8 @@
         </createTable>
 
         <addPrimaryKey
-                constraintName="PK_MAGIC_LINK_SESSION"
-                tableName="MAGIC_LINK_SESSION"
+                constraintName="PK_MAGIC_LOGIN_SESSION"
+                tableName="MAGIC_LOGIN_SESSION"
                 columnNames="ID"
         />
 
@@ -32,10 +32,10 @@
             can be created/resolved only when the link is clicked. Widen
             MAGIC_KEY to hold a SHA-256 hex (the raw key is no longer stored).
         </comment>
-        <addColumn tableName="MAGIC_LINK_SESSION">
+        <addColumn tableName="MAGIC_LOGIN_SESSION">
             <column name="EMAIL" type="VARCHAR(255)"/>
         </addColumn>
-        <modifyDataType tableName="MAGIC_LINK_SESSION" columnName="MAGIC_KEY" newDataType="VARCHAR(64)"/>
+        <modifyDataType tableName="MAGIC_LOGIN_SESSION" columnName="MAGIC_KEY" newDataType="VARCHAR(64)"/>
     </changeSet>
 
     <changeSet author="clarus@cobd.ca" id="v3-otp">
@@ -43,7 +43,7 @@
             Optional one-time code: salted SHA-256 of the code plus a per-session
             wrong-attempt counter for brute-force lockout.
         </comment>
-        <addColumn tableName="MAGIC_LINK_SESSION">
+        <addColumn tableName="MAGIC_LOGIN_SESSION">
             <column name="OTP_HASH" type="VARCHAR(64)"/>
             <column name="OTP_ATTEMPTS" type="INT" defaultValueNumeric="0">
                 <constraints nullable="false"/>

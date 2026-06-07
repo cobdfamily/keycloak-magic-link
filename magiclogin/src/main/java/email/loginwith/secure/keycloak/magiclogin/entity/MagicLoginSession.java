@@ -13,8 +13,8 @@ import jakarta.persistence.Table;
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
 @Entity
-@Table(name = "MAGIC_LINK_SESSION")
-public class MagicLinkSession {
+@Table(name = "MAGIC_LOGIN_SESSION")
+public class MagicLoginSession {
 
     @Id
     @Column(name = "ID", length = 36, nullable = false)

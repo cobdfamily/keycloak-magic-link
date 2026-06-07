@@ -2172,7 +2172,7 @@
     },
     {
       "id": "116776fe-bd61-41c6-8de2-35d3c1dc4d01",
-      "alias": "magiclink",
+      "alias": "magiclogin",
       "description": "Magic Link flow",
       "providerId": "basic-flow",
       "topLevel": true,
@@ -2187,7 +2187,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticator": "magiclink-continuation",
+          "authenticator": "magiclogin-continuation",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
           "priority": 2,
@@ -2435,7 +2435,7 @@
       "config": {}
     }
   ],
-  "browserFlow": "magiclink",
+  "browserFlow": "magiclogin",
   "registrationFlow": "registration",
   "directGrantFlow": "direct grant",
   "resetCredentialsFlow": "reset credentials",

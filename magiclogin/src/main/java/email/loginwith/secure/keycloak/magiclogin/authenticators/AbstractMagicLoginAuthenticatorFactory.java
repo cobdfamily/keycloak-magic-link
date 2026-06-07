@@ -1,13 +1,13 @@
 package email.loginwith.secure.keycloak.magiclogin.authenticators;
 
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.DEFAULT_CREATE_USER;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.DEFAULT_SEND_OTP;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.SEND_OTP_CONFIG_KEY;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY;
-import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkValidityConstants.VALIDITY_DURATION_CONFIG_KEY;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.CREATE_USER_CONFIG_KEY;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.DEFAULT_CREATE_USER;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.DEFAULT_SEND_OTP;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.DEFAULT_SKIP_EMAIL_WITH_LOGIN_HINT;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.SEND_OTP_CONFIG_KEY;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY;
+import static email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginValidityConstants.VALIDITY_DURATION_CONFIG_KEY;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import org.keycloak.provider.ProviderConfigProperty;
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public abstract class AbstractMagicLinkAuthenticatorFactory implements AuthenticatorFactory {
+public abstract class AbstractMagicLoginAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getReferenceCategory() {

@@ -1,7 +1,7 @@
 package email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.api;
 
 import email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.Constants;
-import email.loginwith.secure.keycloak.magiclogin.entity.MagicLinkSession;
+import email.loginwith.secure.keycloak.magiclogin.entity.MagicLoginSession;
 import email.loginwith.secure.keycloak.magiclogin.util.ValidationUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.GET;
@@ -20,12 +20,12 @@ import org.keycloak.models.KeycloakSession;
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkContinuationRestResource {
+public class MagicLoginContinuationRestResource {
 
     private final EntityManager em;
 
 
-    public MagicLinkContinuationRestResource(KeycloakSession session) {
+    public MagicLoginContinuationRestResource(KeycloakSession session) {
         this.em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 
@@ -33,26 +33,26 @@ public class MagicLinkContinuationRestResource {
     @GET
     @Path("")
     @Produces(MediaType.TEXT_HTML)
-    public Response loginWithMagicLink(
-            @QueryParam(Constants.QUERY_PARAM_MAGIC_LINK_SESSION_ID) String magicLinkSessionId,
+    public Response loginWithMagicLogin(
+            @QueryParam(Constants.QUERY_PARAM_MAGIC_LOGIN_SESSION_ID) String magicLoginSessionId,
             @QueryParam(Constants.QUERY_PARAM_MAGIC_KEY) String magicKey
     ) {
-        if (!ValidationUtils.isUUID(magicLinkSessionId) || !ValidationUtils.isUUID(magicKey)) {
+        if (!ValidationUtils.isUUID(magicLoginSessionId) || !ValidationUtils.isUUID(magicKey)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         em.getTransaction().begin();
-        MagicLinkSession magicLinkSession = em.find(MagicLinkSession.class, magicLinkSessionId);
+        MagicLoginSession magicLoginSession = em.find(MagicLoginSession.class, magicLoginSessionId);
         boolean loggedIn = false;
-        if (magicLinkSession != null) {
-            loggedIn = ValidationUtils.isMagicLinkSessionValid(magicLinkSession, magicKey);
-            magicLinkSession.setLoggedIn(loggedIn);
+        if (magicLoginSession != null) {
+            loggedIn = ValidationUtils.isMagicLoginSessionValid(magicLoginSession, magicKey);
+            magicLoginSession.setLoggedIn(loggedIn);
         }
         em.getTransaction().commit();
 
         // Forward the user to the initially opened login page
-        if (loggedIn && magicLinkSession.getRedirectUri() != null) {
-            return Response.status(Response.Status.FOUND).location(UriBuilder.fromUri(magicLinkSession.getRedirectUri()).build()).build();
+        if (loggedIn && magicLoginSession.getRedirectUri() != null) {
+            return Response.status(Response.Status.FOUND).location(UriBuilder.fromUri(magicLoginSession.getRedirectUri()).build()).build();
         }
         // Login was not successful
         return Response.status(Response.Status.UNAUTHORIZED).build();

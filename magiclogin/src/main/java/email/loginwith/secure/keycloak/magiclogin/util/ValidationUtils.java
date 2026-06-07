@@ -1,6 +1,6 @@
 package email.loginwith.secure.keycloak.magiclogin.util;
 
-import email.loginwith.secure.keycloak.magiclogin.entity.MagicLinkSession;
+import email.loginwith.secure.keycloak.magiclogin.entity.MagicLoginSession;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.common.util.Time;
 
@@ -26,7 +26,7 @@ public class ValidationUtils {
      * @param receivedMagicKey The magic key received when the user clicked the magic link
      * @return true if the magic key is valid, false otherwise
      */
-    public static boolean isMagicLinkSessionValid(MagicLinkSession session, String receivedMagicKey) {
+    public static boolean isMagicLoginSessionValid(MagicLoginSession session, String receivedMagicKey) {
         if (session == null || ObjectUtil.isBlank(receivedMagicKey)) {
             return false;
         }

@@ -4,7 +4,7 @@
 
     <groupId>email.loginwith.secure.keycloak</groupId>
     <artifactId>email.loginwith.secure.keycloak.magiclogin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>email.loginwith.secure.keycloak.magiclogin</name>

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-class MagicLinkContinuationTest extends AbstractMagicLinkBaseTest {
+class MagicLoginContinuationTest extends AbstractMagicLoginBaseTest {
 
-    private static final String REALM_TEMPLATE = "magiclink-continuation.json.j2";
+    private static final String REALM_TEMPLATE = "magiclogin-continuation.json.j2";
 
 
     @Test

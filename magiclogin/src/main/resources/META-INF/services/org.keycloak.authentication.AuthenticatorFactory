@@ -1,2 +1,2 @@
-email.loginwith.secure.keycloak.magiclogin.authenticators.normal.MagicLinkAuthenticatorNormalFactory
-email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.MagicLinkAuthenticatorContinuationFactory
+email.loginwith.secure.keycloak.magiclogin.authenticators.normal.MagicLoginAuthenticatorNormalFactory
+email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.MagicLoginAuthenticatorContinuationFactory

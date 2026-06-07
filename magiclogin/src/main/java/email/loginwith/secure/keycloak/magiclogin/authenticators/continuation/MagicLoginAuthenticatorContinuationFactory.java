@@ -3,16 +3,16 @@ package email.loginwith.secure.keycloak.magiclogin.authenticators.continuation;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.KeycloakSession;
 
-import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLinkAuthenticatorFactory;
+import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLoginAuthenticatorFactory;
 
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkAuthenticatorContinuationFactory extends AbstractMagicLinkAuthenticatorFactory {
+public class MagicLoginAuthenticatorContinuationFactory extends AbstractMagicLoginAuthenticatorFactory {
 
-    private static final String PROVIDER_ID = "magiclink-continuation";
+    private static final String PROVIDER_ID = "magiclogin-continuation";
 
-    private static final MagicLinkAuthenticatorContinuation INSTANCE = new MagicLinkAuthenticatorContinuation();
+    private static final MagicLoginAuthenticatorContinuation INSTANCE = new MagicLoginAuthenticatorContinuation();
 
 
     @Override

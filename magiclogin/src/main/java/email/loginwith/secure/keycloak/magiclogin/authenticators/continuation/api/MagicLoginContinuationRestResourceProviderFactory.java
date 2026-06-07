@@ -11,11 +11,11 @@ import email.loginwith.secure.keycloak.magiclogin.authenticators.continuation.Co
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkContinuationRestResourceProviderFactory implements RealmResourceProviderFactory {
+public class MagicLoginContinuationRestResourceProviderFactory implements RealmResourceProviderFactory {
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        return new MagicLinkContinuationRestResourceProvider(session);
+        return new MagicLoginContinuationRestResourceProvider(session);
     }
 
     @Override
@@ -35,6 +35,6 @@ public class MagicLinkContinuationRestResourceProviderFactory implements RealmRe
 
     @Override
     public String getId() {
-        return Constants.MAGIC_LINK_PROVIDER_FACTORY_ID;
+        return Constants.MAGIC_LOGIN_PROVIDER_FACTORY_ID;
     }
 }

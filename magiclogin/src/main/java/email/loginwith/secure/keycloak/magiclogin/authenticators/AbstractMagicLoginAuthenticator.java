@@ -18,7 +18,7 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.validation.Validation;
 
-import email.loginwith.secure.keycloak.magiclogin.entity.MagicLinkSession;
+import email.loginwith.secure.keycloak.magiclogin.entity.MagicLoginSession;
 import email.loginwith.secure.keycloak.magiclogin.sending.EmailLinkSender;
 import email.loginwith.secure.keycloak.magiclogin.sending.LinkSender;
 import email.loginwith.secure.keycloak.magiclogin.util.ValidationUtils;
@@ -30,18 +30,18 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthenticator {
+public abstract class AbstractMagicLoginAuthenticator implements MagicLoginAuthenticator {
 
     protected static final String EMAIL_INPUT_FORM_TEMPLATE = "email-login.ftl";
     protected static final String EMAIL_ATTRIBUTE_FORM_NAME = "username";
 
     protected static final String MAGICKEY_QUERY_PARAM = "magickey";
-    protected static final String MAGICLINK_SESSION_ID_KEY = "magiclink-session-id";
+    protected static final String MAGICLOGIN_SESSION_ID_KEY = "magiclogin-session-id";
     protected static final String OTP_FORM_PARAM = "code";
     protected static final String OTP_FORM_TEMPLATE = "otp-login.ftl";
 
     private final LinkSender linkSender = new EmailLinkSender();
-    private static final Logger logger = Logger.getLogger(AbstractMagicLinkAuthenticator.class);
+    private static final Logger logger = Logger.getLogger(AbstractMagicLoginAuthenticator.class);
 
 
     @Override
@@ -78,15 +78,15 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
         if (willHandle) {
             final String magicKey = generateMagicKey();
-            final String magicLinkSessionId = UUID.randomUUID().toString();
+            final String magicLoginSessionId = UUID.randomUUID().toString();
             // Generate a one-time code only where it's usable (the normal,
             // same-device authenticator) and enabled.
             final String otp = (isOtpEnabled(context) && supportsOtp()) ? generateOtp() : null;
-            storeMagicKey(context, magicKey, magicLinkSessionId, email, otp);
+            storeMagicKey(context, magicKey, magicLoginSessionId, email, otp);
             // Personalise with the user's name only if one already exists; no
             // user is stubbed just for the greeting.
             final String recipientName = existing != null ? existing.getFirstName() : null;
-            sendLink(context, email, getMagicLink(context, magicKey, magicLinkSessionId), otp, recipientName);
+            sendLink(context, email, getMagicLink(context, magicKey, magicLoginSessionId), otp, recipientName);
         }
 
         // Show the info/wait/code page regardless, so unknown (and
@@ -105,7 +105,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         try {
             linkSender.sendLink(context.getSession(), email, magicLink, otpCode, recipientName);
         } catch (IOException e) {
-            logger.warn("MagicLink not generated", e);
+            logger.warn("MagicLogin not generated", e);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR, Response.serverError().build());
         }
     }
@@ -114,7 +114,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
     protected boolean isSkipEmailWithLoginHintEnabled(AuthenticationFlowContext context) {
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
         return config != null && Boolean.parseBoolean(
-              config.getConfig().get(MagicLinkValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY));
+              config.getConfig().get(MagicLoginValidityConstants.SKIP_EMAIL_WITH_LOGIN_HINT_CONFIG_KEY));
     }
 
     /**
@@ -156,7 +156,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
     }
 
 
-    protected abstract String getMagicLink(AuthenticationFlowContext context, String magicKey, String magicLinkSessionId);
+    protected abstract String getMagicLink(AuthenticationFlowContext context, String magicKey, String magicLoginSessionId);
 
     protected abstract void showLinkSentInfo(AuthenticationFlowContext context);
 
@@ -166,31 +166,31 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
     }
 
     protected void storeMagicKey(
-          AuthenticationFlowContext context, String magicKey, String magicLinkSessionId,
+          AuthenticationFlowContext context, String magicKey, String magicLoginSessionId,
           String email, String otp) {
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
-        long validityDurationInSeconds = MagicLinkValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
+        long validityDurationInSeconds = MagicLoginValidityConstants.DEFAULT_VALIDITY_IN_SECONDS;
         if (config != null) {
-            validityDurationInSeconds = Integer.parseInt(config.getConfig().get(MagicLinkValidityConstants.VALIDITY_DURATION_CONFIG_KEY));
+            validityDurationInSeconds = Integer.parseInt(config.getConfig().get(MagicLoginValidityConstants.VALIDITY_DURATION_CONFIG_KEY));
         }
 
         final long validTo = Time.currentTimeMillis() + validityDurationInSeconds * 1000L;
 
-        MagicLinkSession magicLinkSession = new MagicLinkSession();
-        magicLinkSession.setId(magicLinkSessionId);
+        MagicLoginSession magicLoginSession = new MagicLoginSession();
+        magicLoginSession.setId(magicLoginSessionId);
         // Store only the hash of the key, never the key itself.
-        magicLinkSession.setMagicKeyHash(ValidationUtils.sha256Hex(magicKey));
-        magicLinkSession.setEmail(email);
-        magicLinkSession.setValidTo(validTo);
-        magicLinkSession.setRedirectUri(context.getRefreshUrl(true).toString());
+        magicLoginSession.setMagicKeyHash(ValidationUtils.sha256Hex(magicKey));
+        magicLoginSession.setEmail(email);
+        magicLoginSession.setValidTo(validTo);
+        magicLoginSession.setRedirectUri(context.getRefreshUrl(true).toString());
         if (otp != null) {
             // Salt the OTP hash with the (random) session id so identical
             // codes across sessions don't share a hash.
-            magicLinkSession.setOtpHash(otpHash(magicLinkSessionId, otp));
+            magicLoginSession.setOtpHash(otpHash(magicLoginSessionId, otp));
         }
 
-        context.getAuthenticationSession().setAuthNote(MAGICLINK_SESSION_ID_KEY, magicLinkSessionId);
-        getEntityManager(context).persist(magicLinkSession);
+        context.getAuthenticationSession().setAuthNote(MAGICLOGIN_SESSION_ID_KEY, magicLoginSessionId);
+        getEntityManager(context).persist(magicLoginSession);
     }
 
     /**
@@ -240,7 +240,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
         return config != null
               && Boolean.parseBoolean(
-                    config.getConfig().get(MagicLinkValidityConstants.SEND_OTP_CONFIG_KEY));
+                    config.getConfig().get(MagicLoginValidityConstants.SEND_OTP_CONFIG_KEY));
     }
 
     /**
@@ -253,26 +253,26 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
     /** A fresh zero-padded numeric code (preserves leading zeros / fixed width). */
     protected String generateOtp() {
-        int bound = (int) Math.pow(10, MagicLinkValidityConstants.OTP_LENGTH);
+        int bound = (int) Math.pow(10, MagicLoginValidityConstants.OTP_LENGTH);
         int n = new SecureRandom().nextInt(bound);
-        return String.format("%0" + MagicLinkValidityConstants.OTP_LENGTH + "d", n);
+        return String.format("%0" + MagicLoginValidityConstants.OTP_LENGTH + "d", n);
     }
 
     /** Salted SHA-256 of a code; the random session id is the salt. */
-    protected String otpHash(String magicLinkSessionId, String code) {
-        return ValidationUtils.sha256Hex(magicLinkSessionId + ":" + code);
+    protected String otpHash(String magicLoginSessionId, String code) {
+        return ValidationUtils.sha256Hex(magicLoginSessionId + ":" + code);
     }
 
     /**
      * Verify a submitted one-time code against the current session. On success
      * the user is resolved/created (ownership is proven) and login completes;
      * on failure the wrong-attempt counter is charged and the session is burned
-     * at {@link MagicLinkValidityConstants#MAX_OTP_ATTEMPTS}.
+     * at {@link MagicLoginValidityConstants#MAX_OTP_ATTEMPTS}.
      */
     protected void verifyOtp(AuthenticationFlowContext context, String code) {
-        final String sessionId = context.getAuthenticationSession().getAuthNote(MAGICLINK_SESSION_ID_KEY);
+        final String sessionId = context.getAuthenticationSession().getAuthNote(MAGICLOGIN_SESSION_ID_KEY);
         final EntityManager em = getEntityManager(context);
-        MagicLinkSession mls = sessionId == null ? null : em.find(MagicLinkSession.class, sessionId);
+        MagicLoginSession mls = sessionId == null ? null : em.find(MagicLoginSession.class, sessionId);
 
         if (mls == null || mls.getOtpHash() == null) {
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, buildOtpForm(context, true));
@@ -285,7 +285,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
         if (!expired && matches) {
             final String email = mls.getEmail();
-            removeMagicLinkSession(context, mls);  // single-use
+            removeMagicLoginSession(context, mls);  // single-use
             UserModel user = resolveOrCreateUser(context, email);
             if (user != null) {
                 context.setUser(user);
@@ -299,11 +299,11 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
 
         // Wrong/expired code: charge an attempt; burn the session once the cap
         // is reached (or it has expired) so the low-entropy code can't be ground.
-        if (expired || mls.getOtpAttempts() + 1 >= MagicLinkValidityConstants.MAX_OTP_ATTEMPTS) {
-            removeMagicLinkSession(context, mls);
+        if (expired || mls.getOtpAttempts() + 1 >= MagicLoginValidityConstants.MAX_OTP_ATTEMPTS) {
+            removeMagicLoginSession(context, mls);
         } else {
             mls.setOtpAttempts(mls.getOtpAttempts() + 1);
-            mergeMagicLinkSession(context, mls);
+            mergeMagicLoginSession(context, mls);
         }
         context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, buildOtpForm(context, true));
     }
@@ -325,7 +325,7 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
         return config != null
               && Boolean.parseBoolean(
-                    config.getConfig().get(MagicLinkValidityConstants.CREATE_USER_CONFIG_KEY));
+                    config.getConfig().get(MagicLoginValidityConstants.CREATE_USER_CONFIG_KEY));
     }
 
     /**
@@ -357,14 +357,14 @@ public abstract class AbstractMagicLinkAuthenticator implements MagicLinkAuthent
         }
     }
 
-    protected void removeMagicLinkSession(AuthenticationFlowContext context, MagicLinkSession session) {
+    protected void removeMagicLoginSession(AuthenticationFlowContext context, MagicLoginSession session) {
         EntityManager em = getEntityManager(context);
         em.getTransaction().begin();
         em.remove(session);
         em.getTransaction().commit();
     }
 
-    protected void mergeMagicLinkSession(AuthenticationFlowContext context, MagicLinkSession session) {
+    protected void mergeMagicLoginSession(AuthenticationFlowContext context, MagicLoginSession session) {
         EntityManager em = getEntityManager(context);
         em.getTransaction().begin();
         em.merge(session);

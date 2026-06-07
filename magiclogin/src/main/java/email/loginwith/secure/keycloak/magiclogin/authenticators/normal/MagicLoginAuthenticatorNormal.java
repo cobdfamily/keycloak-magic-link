@@ -7,19 +7,19 @@ import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.common.util.KeycloakUriBuilder;
 import org.keycloak.models.UserModel;
 
-import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLinkAuthenticator;
-import email.loginwith.secure.keycloak.magiclogin.entity.MagicLinkSession;
+import email.loginwith.secure.keycloak.magiclogin.authenticators.AbstractMagicLoginAuthenticator;
+import email.loginwith.secure.keycloak.magiclogin.entity.MagicLoginSession;
 import email.loginwith.secure.keycloak.magiclogin.util.LinkUtils;
 import email.loginwith.secure.keycloak.magiclogin.util.ValidationUtils;
 import jakarta.persistence.EntityManager;
 
 /**
  * Implementation of a "normal" magic link authenticator
- * (see {@link email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLinkAuthenticator})
+ * (see {@link email.loginwith.secure.keycloak.magiclogin.authenticators.MagicLoginAuthenticator})
  *
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator {
+public class MagicLoginAuthenticatorNormal extends AbstractMagicLoginAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -38,15 +38,15 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
         }
 
         // Link clicked -> validate the magic key against the stored session.
-        final String authNoteMagicLinkSessionId = context.getAuthenticationSession().getAuthNote(MAGICLINK_SESSION_ID_KEY);
+        final String authNoteMagicLoginSessionId = context.getAuthenticationSession().getAuthNote(MAGICLOGIN_SESSION_ID_KEY);
         final EntityManager em = getEntityManager(context);
 
-        MagicLinkSession magicLinkSession = em.find(MagicLinkSession.class, authNoteMagicLinkSessionId);
-        boolean valid = ValidationUtils.isMagicLinkSessionValid(magicLinkSession, receivedMagicKey);
-        String email = magicLinkSession != null ? magicLinkSession.getEmail() : null;
-        if (magicLinkSession != null) {
+        MagicLoginSession magicLoginSession = em.find(MagicLoginSession.class, authNoteMagicLoginSessionId);
+        boolean valid = ValidationUtils.isMagicLoginSessionValid(magicLoginSession, receivedMagicKey);
+        String email = magicLoginSession != null ? magicLoginSession.getEmail() : null;
+        if (magicLoginSession != null) {
             // Single-use: consume the session whether or not it validated.
-            removeMagicLinkSession(context, magicLinkSession);
+            removeMagicLoginSession(context, magicLoginSession);
         }
 
         // Ownership is proven only now -> resolve or create the user.
@@ -61,8 +61,8 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
     }
 
     @Override
-    protected String getMagicLink(AuthenticationFlowContext context, String magicKey, String magicLinkSessionId) {
-        return createMagicLink(context, magicKey);
+    protected String getMagicLink(AuthenticationFlowContext context, String magicKey, String magicLoginSessionId) {
+        return createMagicLogin(context, magicKey);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MagicLinkAuthenticatorNormal extends AbstractMagicLinkAuthenticator
     }
 
 
-    private String createMagicLink(AuthenticationFlowContext context, String magicKey) {
+    private String createMagicLogin(AuthenticationFlowContext context, String magicKey) {
         String url = KeycloakUriBuilder.fromUri(context.getRefreshExecutionUrl()).build().toString();
         return LinkUtils.getLink(url, Map.of(MAGICKEY_QUERY_PARAM, magicKey));
     }

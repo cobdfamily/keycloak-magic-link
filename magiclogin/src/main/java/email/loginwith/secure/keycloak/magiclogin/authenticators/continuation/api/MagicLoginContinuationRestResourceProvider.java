@@ -6,19 +6,19 @@ import org.keycloak.services.resource.RealmResourceProvider;
 /**
  * @author Ludwig Burtscher (ludwig.burtscher@cloudflight.io)
  */
-public class MagicLinkContinuationRestResourceProvider implements RealmResourceProvider {
+public class MagicLoginContinuationRestResourceProvider implements RealmResourceProvider {
 
     private KeycloakSession session;
 
 
-    public MagicLinkContinuationRestResourceProvider(KeycloakSession session) {
+    public MagicLoginContinuationRestResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
 
     @Override
     public Object getResource() {
-        return new MagicLinkContinuationRestResource(session);
+        return new MagicLoginContinuationRestResource(session);
     }
 
     @Override

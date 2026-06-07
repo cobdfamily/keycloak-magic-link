@@ -37,7 +37,7 @@ import email.loginwith.secure.keycloak.magiclogin.util.KeycloakRealmTemplateExte
  */
 @Testcontainers
 @ExtendWith(KeycloakRealmTemplateExtension.class)
-abstract class AbstractMagicLinkBaseTest {
+abstract class AbstractMagicLoginBaseTest {
 
     private static final Pattern LINK_PATTERN = Pattern.compile("(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
